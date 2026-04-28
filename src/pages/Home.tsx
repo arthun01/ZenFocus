@@ -1,10 +1,11 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Text, View, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TNavigationScreenProps } from '../AppRoutes';
 import { Theme } from '../shared/themes/Theme';
 import { StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 
 import CircularProgress from 'react-native-circular-progress';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
@@ -12,18 +13,34 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress';
 export const Home = () => {
     const navigation = useNavigation<TNavigationScreenProps>();
 
+    const [currentStatus, setCurrentStatus] = useState<'focus' | 'short_break' | 'long_break'>('focus');
     const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
     const [isRunning, setIsRunning] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
 
-    const [currentFocusCircleTime] = useState(25 * 60);
-    const [currentShortBreakCircleTime] = useState(5 * 60);
-    const [currentLongBreakCircleTime] = useState(15 * 60);
+    const [currentShortBreakCircleTime, setCurrentShortBreakCircleTime] = useState(5 * 60);
+    const [currentLongBreakCircleTime, setCurrentLongBreakCircleTime] = useState(15 * 60);
+    const [currentFocusCircleTime, setCurrentFocusCircleTime] = useState(25 * 60);
 
     const [counterCircleTime, setCounterCircleTime] = useState(25 * 60);
 
-    const [currentStatus, setCurrentStatus] = useState<'focus' | 'short_break' | 'long_break'>('focus');
+    useFocusEffect(
+        useCallback(() => {
 
+            Promise.all([
+                AsyncStorage.getItem('SHORT_BREAK_PERIOD'),
+                AsyncStorage.getItem('LONG_BREAK_PERIOD'),
+                AsyncStorage.getItem('FOCUS_PERIOD'),
+            ])
+            .then(([short, long, focus]) => {
+                setCurrentShortBreakCircleTime(JSON.parse(short || '5') * 60);
+                setCurrentLongBreakCircleTime(JSON.parse(long || '15') * 60);
+                setCurrentFocusCircleTime(JSON.parse(focus || '25') * 60);
+                setCounterCircleTime(JSON.parse(focus || '25') * 60);
+
+            });
+        }, [])
+    )
     
 
     useEffect(() => {
@@ -81,6 +98,7 @@ export const Home = () => {
 
     const handleStop = () => {
         setStep(1);
+        setCurrentStatus('focus');
         setIsPaused(false);
         setIsRunning(false);
         setCounterCircleTime(currentFocusCircleTime);
@@ -236,10 +254,10 @@ export const Home = () => {
                         Pomodoros: 
                     </Text>
 
-                    <View style={step >= 2 ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
-                    <View style={step >= 3 ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
-                    <View style={step >= 4 ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
-                    <View style={step === 1 && currentStatus === 'long_break' ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
+                    <View style={step >= 2 || currentStatus === 'long_break'  ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
+                    <View style={step >= 3 || currentStatus === 'long_break'  ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
+                    <View style={step >= 4 || currentStatus === 'long_break'   ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
+                    <View style={currentStatus === 'long_break' ? styles.pomodorosIndicatorComplete : styles.pomodorosIndicator} />
                 </View>
             </View>
         </View>
