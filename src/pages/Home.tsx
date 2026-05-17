@@ -9,6 +9,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 
 import CircularProgress from 'react-native-circular-progress';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import { updateStateByElapsedTime } from '../shared/helpers/UpdateStateByElapsedTime';
 
 export const Home = () => {
     const navigation = useNavigation<TNavigationScreenProps>();
@@ -50,12 +51,13 @@ export const Home = () => {
                 if(!appState) return;
 
                 console.log(appState);
+                const updatedAppState = updateStateByElapsedTime(appState)
 
-                setCounterCircleTime(appState.counterCircleTime);
-                setCurrentStatus(appState.currentStatus);
-                setIsRunning(appState.isRunning);
-                setIsPaused(appState.isPaused);
-                setStep(appState.step);
+                setCounterCircleTime(updatedAppState.counterCircleTime);
+                setCurrentStatus(updatedAppState.currentStatus);
+                setIsRunning(updatedAppState.isRunning);
+                setIsPaused(updatedAppState.isPaused);
+                setStep(updatedAppState.step);
             })
     }, []);
 
@@ -100,14 +102,19 @@ export const Home = () => {
             default: break;
         }
 
-        AsyncStorage.setItem('APP_STATE', JSON.stringify({
+        const appStateToSave = {
             step,
             isPaused,
             isRunning,
             currentStatus,
             time: Date.now(),
-            counterCircleTime
-        }))
+            counterCircleTime,
+            currentFocusCircleTime,
+            currentLongBreakCircleTime,
+            currentShortBreakCircleTime
+        };
+
+        AsyncStorage.setItem('APP_STATE', JSON.stringify(appStateToSave))
 
     }, [isPaused, isRunning, currentLongBreakCircleTime, currentFocusCircleTime, currentStatus, step, currentShortBreakCircleTime, currentStatus, counterCircleTime]);
 
