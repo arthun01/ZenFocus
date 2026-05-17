@@ -1,11 +1,11 @@
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TNavigationScreenProps } from '../AppRoutes';
 import { Theme } from '../shared/themes/Theme';
 import { StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 
 import CircularProgress from 'react-native-circular-progress';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
@@ -13,6 +13,14 @@ import { updateStateByElapsedTime } from '../shared/helpers/UpdateStateByElapsed
 
 export const Home = () => {
     const navigation = useNavigation<TNavigationScreenProps>();
+
+    const [appRunningState, setAppRunningState] = useState(AppState.currentState);
+    useEffect(() => {
+        const listener = AppState.addEventListener('change', setAppRunningState);
+
+        return () => listener.remove();
+    }, []);
+    console.log('appRunningState', appRunningState);
 
     const [currentStatus, setCurrentStatus] = useState<'focus' | 'short_break' | 'long_break'>('focus');
     const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -37,29 +45,9 @@ export const Home = () => {
                 setCurrentShortBreakCircleTime(JSON.parse(short || '5') * 60);
                 setCurrentLongBreakCircleTime(JSON.parse(long || '15') * 60);
                 setCurrentFocusCircleTime(JSON.parse(focus || '25') * 60);
-                setCounterCircleTime(JSON.parse(focus || '25') * 60);
-
             });
         }, [])
     )
-    
-    useEffect(() => {
-        AsyncStorage
-            .getItem("APP_STATE")
-            .then(value => {
-                const appState = JSON.parse(value || 'null');
-                if(!appState) return;
-
-                console.log(appState);
-                const updatedAppState = updateStateByElapsedTime(appState)
-
-                setCounterCircleTime(updatedAppState.counterCircleTime);
-                setCurrentStatus(updatedAppState.currentStatus);
-                setIsRunning(updatedAppState.isRunning);
-                setIsPaused(updatedAppState.isPaused);
-                setStep(updatedAppState.step);
-            })
-    }, []);
 
     useEffect(() => {
         if(!isRunning || isPaused) return;
@@ -102,9 +90,59 @@ export const Home = () => {
             default: break;
         }
 
-        const appStateToSave = {
+
+
+    }, [isPaused, isRunning, currentLongBreakCircleTime, currentFocusCircleTime, currentStatus, step, currentShortBreakCircleTime, currentStatus, counterCircleTime]);
+
+    const isShouldUpdate = useRef(true);
+    useEffect(() => {
+        if(isShouldUpdate.current){
+            isShouldUpdate.current = false;
+
+            AsyncStorage
+                .getItem("APP_STATE")
+                .then(value => {
+                    const appState = JSON.parse(value || 'null');
+                    if(!appState) return;
+
+                    console.log(appState);
+                    const updatedAppState = updateStateByElapsedTime(appState)
+
+                    setCounterCircleTime(updatedAppState.counterCircleTime);
+                    setCurrentStatus(updatedAppState.currentStatus);
+                    setIsRunning(updatedAppState.isRunning);
+                    setIsPaused(updatedAppState.isPaused);
+                    setStep(updatedAppState.step);
+            })
+        }
+
+        if(appRunningState === 'background'){
+            isShouldUpdate.current = true;
+        }
+    }, [appRunningState]);
+
+    const handleStart = () => {
+        setIsRunning(true);
+
+        AsyncStorage.setItem('APP_STATE', JSON.stringify({
             step,
             isPaused,
+            isRunning: true,
+            currentStatus,
+            time: Date.now(),
+            counterCircleTime,
+            currentFocusCircleTime,
+            currentLongBreakCircleTime,
+            currentShortBreakCircleTime
+        }));
+    }
+
+    const handlePause = () => {
+        setIsPaused(true);
+
+        AsyncStorage.setItem('APP_STATE', JSON.stringify({
+            step,
+            isPaused: true,
             isRunning,
             currentStatus,
             time: Date.now(),
@@ -112,20 +150,7 @@ export const Home = () => {
             currentFocusCircleTime,
             currentLongBreakCircleTime,
             currentShortBreakCircleTime
-        };
-
-        AsyncStorage.setItem('APP_STATE', JSON.stringify(appStateToSave))
-
-    }, [isPaused, isRunning, currentLongBreakCircleTime, currentFocusCircleTime, currentStatus, step, currentShortBreakCircleTime, currentStatus, counterCircleTime]);
-
-
-
-    const handleStart = () => {
-        setIsRunning(true);
-    }
-
-    const handlePause = () => {
-        setIsPaused(true);
+        }));
     }
 
     const handleStop = () => {
@@ -134,10 +159,34 @@ export const Home = () => {
         setIsPaused(false);
         setIsRunning(false);
         setCounterCircleTime(currentFocusCircleTime);
+
+        AsyncStorage.setItem('APP_STATE', JSON.stringify({
+            step: 1,
+            isPaused: false,
+            isRunning: false,
+            currentStatus: 'focus',
+            time: Date.now(),
+            counterCircleTime: currentFocusCircleTime,
+            currentFocusCircleTime,
+            currentLongBreakCircleTime,
+            currentShortBreakCircleTime
+        }));
     }
 
     const handleContinue = () => {
         setIsPaused(false);
+
+        AsyncStorage.setItem('APP_STATE', JSON.stringify({
+            step,
+            isPaused: false,
+            isRunning,
+            currentStatus,
+            time: Date.now(),
+            counterCircleTime,
+            currentFocusCircleTime,
+            currentLongBreakCircleTime,
+            currentShortBreakCircleTime
+        }));
     }
 
     const timeProgress = useMemo(() => {
@@ -152,7 +201,11 @@ export const Home = () => {
     return (
         <View style={styles.mainContainer}>
             {/* Botão Settings */}
-            <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
+            <TouchableOpacity
+                disabled={isRunning}
+                style={{ ...styles.settingsButton, opacity: isRunning ? 0 : 1 }}
+                onPress={() => navigation.navigate('Settings')}
+            >
                 <Ionicons name="settings" size={28} color={Theme.colors.divider} />
             </TouchableOpacity>
 
