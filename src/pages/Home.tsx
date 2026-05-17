@@ -131,7 +131,7 @@ export const Home = () => {
                     {/* TÍTULO */}
                     <View style={styles.titleContainer}>
                         <Text style={styles.titleText}>
-                            ZenFocus
+                            Pomodoro Timer
                         </Text>
                     </View>
 

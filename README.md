@@ -1,50 +1,73 @@
-# Welcome to your Expo app 👋
+# 🍅 Pomodoro Timer
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Um aplicativo de cronômetro Pomodoro limpo e eficiente, desenvolvido para ajudar no foco e na gestão de tempo. Construído com um ecossistema moderno utilizando React Native e Expo.
 
-## Get started
+## ✨ Funcionalidades
 
-1. Install dependencies
+O projeto foi estruturado para oferecer uma ótima experiência de usuário, integrando as seguintes ferramentas:
 
-   ```bash
-   npm install
-   ```
+- **Acompanhamento Visual:** Progresso do tempo animado em formato circular utilizando `react-native-circular-progress`.
+- **Feedback Tátil:** Respostas físicas (vibração) integradas com `expo-haptics` para alertar sobre o fim dos ciclos.
+- **Armazenamento de Dados:** Persistência de configurações ou histórico de sessões localmente via `@react-native-async-storage/async-storage`.
+- **Navegação Fluida:** Transições de tela gerenciadas pelo `React Navigation`.
+- **Animações Nativas:** Interfaces suaves construídas com `react-native-reanimated`.
 
-2. Start the app
+## 🚀 Tecnologias Utilizadas
 
-   ```bash
-   npx expo start
-   ```
+- [React Native](https://reactnative.dev/) (Nova Arquitetura habilitada)
+- [Expo](https://expo.dev/) (SDK 54)
+- [TypeScript](https://www.typescriptlang.org/)
+- [React Compiler](https://react.dev/learn/react-compiler) (Experimental)
 
-In the output, you'll find options to open the app in a
+## 🛠️ Como executar o projeto
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Pré-requisitos
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina. O uso de um dispositivo físico com o aplicativo [Expo Go](https://expo.dev/go) ou um emulador (Android Studio / Xcode) é recomendado.
 
-## Get a fresh project
+### Instalação
 
-When you're ready, run:
+1. Clone este repositório.
+2. Instale as dependências do projeto:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Rodando o aplicativo
 
-## Learn more
+Inicie o servidor de desenvolvimento do Expo:
 
-To learn more about developing your project with Expo, look at the following resources:
+Bash
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+npm start
+```
 
-## Join the community
+No terminal, você verá um QR Code e algumas opções. Você pode:
 
-Join our community of developers creating universal apps.
+- Pressionar `a` para abrir no emulador **Android**.
+    
+- Pressionar `i` para abrir no simulador **iOS**.
+    
+- Escanear o QR Code com a câmera do seu celular (iOS) ou com o aplicativo Expo Go (Android) para rodar no dispositivo físico.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📂 Scripts Disponíveis
+
+No diretório do projeto, você pode rodar os seguintes comandos:
+
+- `npm start`: Inicia o empacotador Metro.
+    
+- `npm run android`: Inicia o projeto diretamente no emulador Android.
+    
+- `npm run ios`: Inicia o projeto diretamente no simulador iOS.
+    
+- `npm run web`: Inicia o projeto no navegador web.
+    
+- `npm run lint`: Executa a verificação de código com o ESLint.
+    
+- `npm run reset-project`: Reseta o projeto base para começar do zero (útil caso queira limpar a estrutura padrão do Expo).
+
+---
+
+_Desenvolvido com ☕ e foco._
