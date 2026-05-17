@@ -1,4 +1,4 @@
-# 🍅 Pomodoro Timer
+# 🍅 ZenFocus
 
 Um aplicativo de cronômetro Pomodoro limpo e eficiente, desenvolvido para ajudar no foco e na gestão de tempo. Construído com um ecossistema moderno utilizando React Native e Expo.
 

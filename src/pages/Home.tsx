@@ -42,12 +42,19 @@ export const Home = () => {
         }, [])
     )
     
+    useEffect(() => {
+        AsyncStorage
+            .getItem("APP_STATE")
+            .then(value => {
+                console.log(value);
+            })
+    }, []);
 
     useEffect(() => {
         if(!isRunning || isPaused) return;
 
         const ref = setInterval(() => {
-            setCounterCircleTime(old => old <= 0 ? old : old - 100);
+            setCounterCircleTime(old => old <= 0 ? old : old - 1);
         }, 1000);
 
         return () => clearInterval(ref);
@@ -55,7 +62,7 @@ export const Home = () => {
 
     useEffect(() => {
 
-        switch (currentStatus){
+        switch (currentStatus) {
             case 'focus':{
                     if(counterCircleTime > 0) break;
 
@@ -84,7 +91,19 @@ export const Home = () => {
             default: break;
         }
 
-    }, [currentLongBreakCircleTime ,currentFocusCircleTime, currentStatus, step, currentShortBreakCircleTime, currentStatus, counterCircleTime]);
+        AsyncStorage.setItem('APP_STATE', JSON.stringify({
+            step,
+            isPaused,
+            isRunning,
+            currentStatus,
+            time: Date.now(),
+            counterCircleTime,
+            currentFocusCircleTime,
+            currentLongBreakCircleTime,
+            currentShortBreakCircleTime
+        }))
+
+    }, [isPaused, isRunning, currentLongBreakCircleTime, currentFocusCircleTime, currentStatus, step, currentShortBreakCircleTime, currentStatus, counterCircleTime]);
 
 
 
@@ -131,7 +150,7 @@ export const Home = () => {
                     {/* TÍTULO */}
                     <View style={styles.titleContainer}>
                         <Text style={styles.titleText}>
-                            Pomodoro Timer
+                            ZenFocus
                         </Text>
                     </View>
 
