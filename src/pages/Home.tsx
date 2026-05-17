@@ -46,7 +46,16 @@ export const Home = () => {
         AsyncStorage
             .getItem("APP_STATE")
             .then(value => {
-                console.log(value);
+                const appState = JSON.parse(value || 'null');
+                if(!appState) return;
+
+                console.log(appState);
+
+                setCounterCircleTime(appState.counterCircleTime);
+                setCurrentStatus(appState.currentStatus);
+                setIsRunning(appState.isRunning);
+                setIsPaused(appState.isPaused);
+                setStep(appState.step);
             })
     }, []);
 
@@ -97,10 +106,7 @@ export const Home = () => {
             isRunning,
             currentStatus,
             time: Date.now(),
-            counterCircleTime,
-            currentFocusCircleTime,
-            currentLongBreakCircleTime,
-            currentShortBreakCircleTime
+            counterCircleTime
         }))
 
     }, [isPaused, isRunning, currentLongBreakCircleTime, currentFocusCircleTime, currentStatus, step, currentShortBreakCircleTime, currentStatus, counterCircleTime]);
