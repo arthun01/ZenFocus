@@ -203,7 +203,9 @@ export const Home = () => {
             {/* Botão Settings */}
             <TouchableOpacity
                 disabled={isRunning}
-                style={{ ...styles.settingsButton, opacity: isRunning ? 0 : 1 }}
+                style={{ ...styles.settingsButton, opacity: isRunning ? 0 : 1
+                    
+                 }}
                 onPress={() => navigation.navigate('Settings')}
             >
                 <Ionicons name="settings" size={28} color={Theme.colors.divider} />
